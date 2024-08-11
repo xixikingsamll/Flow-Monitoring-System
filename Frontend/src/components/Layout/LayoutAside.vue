@@ -1,21 +1,24 @@
 <template>
     <el-menu
-        default-active="2"
+        default-active="1"
         class="el-menu-vertical-demo"
         @open="handleOpen"
         @close="handleClose"
     >
         <el-menu-item index="1">
-          <span>Navigator Two</span>
+          <span>实时监控</span>
         </el-menu-item>
         <el-menu-item index="2">
-          <span>Navigator Two</span>
+          <span>流量统计</span>
         </el-menu-item>
         <el-menu-item index="3">
-          <span>Navigator Three</span>
+          <span>流量预测</span>
         </el-menu-item>
         <el-menu-item index="4">
-          <span>Navigator Four</span>
+          <span>应用流量</span>
+        </el-menu-item>
+        <el-menu-item index="5">
+          <span>定制报告</span>
         </el-menu-item>
     </el-menu>
 </template>
@@ -28,3 +31,10 @@ const handleClose = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
 </script>
+
+<style scoped>
+span{
+  width: 100%;
+  text-align: center;
+}
+</style>
