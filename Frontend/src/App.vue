@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import LayoutAside from './components/Layout/LayoutAside.vue';
 import LayoutHeader from './components/Layout/LayoutHeader.vue';
+import LayoutBreadCrumb from './components/Layout/LayoutBreadCrumb.vue';
 </script>
 
 <template>
@@ -13,7 +14,10 @@ import LayoutHeader from './components/Layout/LayoutHeader.vue';
         <el-aside width="200px" class="aside">
           <LayoutAside />
         </el-aside>
-        <el-main><RouterView /></el-main>
+        <el-main>
+          <LayoutBreadCrumb />
+          <RouterView />
+        </el-main>
       </el-container>
     </el-container>
   </div>
