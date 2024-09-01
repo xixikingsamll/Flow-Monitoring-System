@@ -10,6 +10,8 @@ wss.on('connection', (ws) => {
   // 定期获取并发送端口流量信息
   const intervalId = setInterval(() => {
     getPortTraffic((connections) => {
+      console.log(connections);
+      
       ws.send(JSON.stringify(connections));
     });
   }, 1000); // 每1秒获取一次数据

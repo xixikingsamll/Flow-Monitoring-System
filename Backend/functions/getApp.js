@@ -49,6 +49,7 @@ function getPortTraffic(callback) {
 
         const decodedTypeperf = iconv.decode(stdout, 'gbk');
         const typeperfLines = decodedTypeperf.split('\n');
+        
 
         // 解析 typeperf 输出
         const networkData = typeperfLines.slice(2).map(line => {
@@ -60,6 +61,7 @@ function getPortTraffic(callback) {
             console.warn('Skipping malformed line:', line);
             return null;
         }
+        
         const [timestamp, sentBytes1, sentBytes2, receivedBytes1, receivedBytes2] = parts;
         return {
             timestamp,
@@ -67,7 +69,7 @@ function getPortTraffic(callback) {
             receivedBytes: parseFloat(receivedBytes2)
         };
         }).filter(data => data !== null); // 过滤掉格式不正确的行
-        
+      
       
       // 更新连接信息中的流量数据
       const detailedConnections = connections.map(connection => {

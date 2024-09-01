@@ -1,7 +1,14 @@
 <template>
   <div>
-    <div ref="chartContainer" style="width: 100%; height: 400px;"></div>
-    <pre>{{ trafficData }}</pre>
+    <div ref="chartContainer" style="width: 100%; height: 300px;"></div>
+    <el-table :data="trafficData" style="width: 100%" height="50vh">
+      <el-table-column fixed prop="protocol" label="协议" width="150" />
+      <el-table-column prop="localAddress" label="本地地址" width="300" />
+      <el-table-column prop="remoteAddress" label="远程地址" width="300" />
+      <el-table-column prop="localPort" label="本地端口" width="200" />
+      <el-table-column prop="state" label="状态" width="200" />
+      <el-table-column prop="pid" label="PID" width="200" />
+    </el-table>
   </div>
 </template>
 
@@ -10,7 +17,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import * as echarts from 'echarts';
 
 // 使用 ref 来定义响应式状态
-const trafficData = ref('正在连接到服务器...');
+const trafficData = ref([]);
 let ws;  // 用于存储 WebSocket 实例
 
 const chartContainer = ref(null);
@@ -65,9 +72,10 @@ const connectWebSocket = () => {
 
   ws.onmessage = (event) => {
     const connections = JSON.parse(event.data)
-    console.log('收到数据:', connections)
     trafficData.value = connections  // 更新 trafficData
-
+    let newArr = trafficData.value
+    newArr.reverse()
+    trafficData.value = newArr
     // 添加新的数据点
     const now = new Date().toLocaleTimeString();
     xy.value.timestamps.push(now);
