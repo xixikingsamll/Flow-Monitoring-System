@@ -72,6 +72,8 @@ const connectWebSocket = () => {
 
   ws.onmessage = (event) => {
     const connections = JSON.parse(event.data)
+    console.log(connections);
+    
     trafficData.value = connections  // 更新 trafficData
     let newArr = trafficData.value
     newArr.reverse()

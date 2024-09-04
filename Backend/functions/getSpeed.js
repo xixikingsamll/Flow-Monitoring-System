@@ -5,7 +5,7 @@ const testNetworkSpeed = new speedTest();
 // 获取网络下载速度的函数
 async function getNetworkDownloadSpeed() {
     const baseUrl = 'https://eu.httpbin.org/stream-bytes/500000';
-    const fileSizeInBytes = 500000;
+    const fileSizeInBytes = 4000000;
     const speed = await testNetworkSpeed.checkDownloadSpeed(baseUrl, fileSizeInBytes);
     return speed.mbps; // 返回以 Mbps 为单位的下载速度
 }

@@ -1,6 +1,9 @@
 const { exec } = require('child_process');
 const iconv = require('iconv-lite');
 
+let totalSentBytes = 0;      // 初始化总发送字节数
+let totalReceivedBytes = 0;  // 初始化总接收字节数
+
 // 获取端口流量信息的函数
 function getPortTraffic(callback) {
   exec('netstat -ano', { encoding: 'buffer' }, (error, stdout, stderr) => {
@@ -62,11 +65,18 @@ function getPortTraffic(callback) {
             return null;
         }
         
-        const [timestamp, sentBytes1, sentBytes2, receivedBytes1, receivedBytes2] = parts;
+        const [timestamp, , sentBytesStr, , receivedBytesStr] = parts;
+        const sentBytes = parseInt(sentBytesStr);
+        const receivedBytes = parseInt(receivedBytesStr);
+        
+        // 累加总流量
+        totalSentBytes += sentBytes;
+        totalReceivedBytes += receivedBytes;
+
         return {
             timestamp,
-            sentBytes: parseFloat(sentBytes2),
-            receivedBytes: parseFloat(receivedBytes2)
+            sentBytes,
+            receivedBytes
         };
         }).filter(data => data !== null); // 过滤掉格式不正确的行
       
@@ -81,7 +91,7 @@ function getPortTraffic(callback) {
         connection.receivedBytes = latestData.receivedBytes;
         
         return {
-          ...connection
+          ...connection, totalSentBytes, totalReceivedBytes
         };
       });
 
