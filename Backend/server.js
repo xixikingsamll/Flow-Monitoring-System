@@ -31,7 +31,6 @@ wss.on('connection', (ws) => {
         let latency = parseFloat(parseFloat(await getNetworkLatency()).toFixed(2)) || 0;
         // 获取流量并存入
         let downloadSpeed = parseFloat(parseFloat(await getNetworkDownloadSpeed()).toFixed(2)) || 0;
-        console.log(downloadSpeed);
         
         if (downloadSpeed === Infinity) {
             downloadSpeed = 0

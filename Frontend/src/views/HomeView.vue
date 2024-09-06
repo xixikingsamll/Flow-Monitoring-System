@@ -1,13 +1,12 @@
 <template>
   <div>
-    <h1>实时网速监控</h1>
-    <p>当前下载速度: {{ downloadSpeed }} Mbps</p>
-    <p>网络延迟: {{ latency }} ms</p>
-  </div>
+    <stepView />
+  </div>  
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import stepView from '@/components/home/stepView.vue'
 
 const downloadSpeed = ref('0.00'); // 保存下载速度的变量
 const latency = ref('0'); // 保存网络延迟的变量
