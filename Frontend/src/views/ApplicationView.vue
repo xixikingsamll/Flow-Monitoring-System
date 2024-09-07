@@ -1,7 +1,10 @@
 <template>
   <div>
-    <div ref="chartContainer" style="width: 100%; height: 300px;"></div>
-    <el-table :data="trafficData" style="width: 100%" height="50vh">
+    <!-- 可视化 -->
+    <div ref="chartContainer" style="width: 100%; height: 300px;" class="flex "></div>
+
+    <!-- 端口表格 -->
+    <el-table :data="trafficData" style="width: 100%" height="50vh" class="flex items-center justify-center">
       <el-table-column fixed prop="protocol" label="协议" width="150" />
       <el-table-column prop="localAddress" label="本地地址" width="300" />
       <el-table-column prop="remoteAddress" label="远程地址" width="300" />
@@ -12,17 +15,17 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as echarts from 'echarts';
 
 // 使用 ref 来定义响应式状态
-const trafficData = ref([]);
-let ws;  // 用于存储 WebSocket 实例
+const trafficData = ref();
+let ws:any;  // 用于存储 WebSocket 实例
 
-const chartContainer = ref(null);
-const chartInstance = ref(null);
-const defaultXY = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+const chartContainer = ref();
+const chartInstance = ref();
+const defaultXY = new Array(60).fill(0)
 const xy = ref({
   timestamps: [...defaultXY],
   sentByte: [...defaultXY],
@@ -70,13 +73,11 @@ const connectWebSocket = () => {
     console.log('已连接到服务器');
   };
 
-  ws.onmessage = (event) => {
+  ws.onmessage = (event:any) => {
     const connections = JSON.parse(event.data)
-    console.log(connections);
     
-    trafficData.value = connections  // 更新 trafficData
+    trafficData.value = connections.connections  // 更新 trafficData
     let newArr = trafficData.value
-    newArr.reverse()
     trafficData.value = newArr
     // 添加新的数据点
     const now = new Date().toLocaleTimeString();
@@ -85,7 +86,7 @@ const connectWebSocket = () => {
     xy.value.receivedByte.push(trafficData.value[0].receivedBytes);
 
     // 限制数据点数量，保留最新的 60 秒的数据
-    if (xy.value.timestamps.length > 120) {
+    if (xy.value.timestamps.length > 60) {
       xy.value.timestamps.shift();
       xy.value.sentByte.shift();
       xy.value.receivedByte.shift();
@@ -99,7 +100,7 @@ const connectWebSocket = () => {
     setTimeout(connectWebSocket, 3000) // 尝试重新连接
   };
 
-  ws.onerror = (error) => {
+  ws.onerror = (error:any) => {
     console.error('WebSocket 错误:', error);
   };
 };

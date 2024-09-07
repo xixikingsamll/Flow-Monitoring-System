@@ -26,7 +26,7 @@ wss.on('connection', (ws) => {
     console.log('客户端已连接');
 
     // 定期获取网速并发送给客户端
-    setInterval(async () => {
+    const i = setInterval(async () => {
         // 获取延迟
         let latency = parseFloat(parseFloat(await getNetworkLatency()).toFixed(2)) || 0;
         // 获取流量并存入
@@ -47,15 +47,9 @@ wss.on('connection', (ws) => {
 
         // 求平均值
         const result = {
-            oneMinute: {
-                averageFlow: averageFlow(oneMinute)
-            },
-            fiveMinute: {
-                averageFlow: averageFlow(fiveMinute)
-            },
-            oneHour: {
-                averageFlow: averageFlow(oneHour)
-            }
+            oneMinute: averageFlow(oneMinute),
+            fiveMinute: averageFlow(fiveMinute),
+            oneHour: averageFlow(oneHour)
         }
         console.log(result);
          
@@ -72,6 +66,7 @@ wss.on('connection', (ws) => {
     // 处理客户端断开连接的事件
     ws.on('close', () => {
         console.log('客户端已断开连接');
+        clearInterval(i)
     }); // 处理客户端断开连接的事件
 });
 

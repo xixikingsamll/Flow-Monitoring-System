@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import HomeView from '@/views/HomeView.vue'
 import ApplicationView from '@/views/ApplicationView.vue'
 import ReportView from '@/views/ReportView.vue'
 import PredictView from '@/views/PredictView.vue'
@@ -13,21 +13,13 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta:{ breadcrumbLabel: 'HomePage' }
+      meta:{ breadcrumbLabel: '首页' }
     },
     {
       path: '/ApplicationView',
       name: 'app',
       component: ApplicationView,
       meta:{ breadcrumbLabel: '应用流量' },
-      children: [
-        {
-          path: '/ApplicationView/All',
-          name: 'all',
-          component: ReportView,
-          meta:{ breadcrumbLabel: '全部流量' }
-        },
-      ]
     },
     {
       path: '/ReportView',

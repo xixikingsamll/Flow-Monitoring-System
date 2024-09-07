@@ -10,3 +10,15 @@ export const useCounterStore = defineStore('counter', () => {
 
   return { count, doubleCount, increment }
 })
+
+// 记录消耗的流量
+export const useCounterFlow = defineStore('counterFlow', () => {
+  const flow = ref(0)
+
+   // 定义更新 flow 的方法
+  const setFlow = (newFlow: number) => {
+    flow.value = newFlow;
+  };
+
+  return { flow,setFlow }
+})

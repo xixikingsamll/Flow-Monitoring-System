@@ -1,20 +1,31 @@
 <template>
   <div>
-    <p>当前下载速度: {{ downloadSpeed }} Mbps</p>
-    <p>网络延迟: {{ latency }} ms</p>
+    <div class="flex flex-row justify-around items-center w-full pt-10">
+      <DataCard color="blue" title="当前下载速度" unit="Mbps" :data="downloadSpeed"/>
+      <DataCard color="black" title="延迟" unit="ms" :data="latency"/>
+    </div>
     <div ref="chartContainer" style="width: 100%; height: 400px;"></div>
+    <div class="flex flex-row justify-around items-center w-full pt-10">
+      <DataCard color="blue" title="近一分钟平均网速" unit="Mbps" :data="oneMinute"/>
+      <DataCard color="red" title="近五分钟平均网速" unit="Mbps" :data="fiveMinute"/>
+      <DataCard color="red" title="近一小时平均网速" unit="Mbps" :data="oneHour"/>
+    </div>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue';
 import * as echarts from 'echarts';
+import DataCard from '@/components/monitor/DataCard.vue';
 
-const downloadSpeed = ref('0.00'); // 保存下载速度的变量
-const latency = ref('0'); // 保存网络延迟的变量
+const downloadSpeed = ref(0); // 保存下载速度的变量
+const latency = ref(0); // 保存网络延迟的变量
+const oneMinute = ref()
+const fiveMinute = ref()
+const oneHour = ref()
 const chartContainer = ref(null);
-const chartInstance = ref(null);
-const defaultXY = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+const chartInstance = ref();
+const defaultXY = new Array(120).fill(0)
 const xy = ref({
   timestamps: [...defaultXY],
   speeds: [...defaultXY]
@@ -44,17 +55,23 @@ const updateChart = () => {
   }
 };
 
+// 创建 WebSocket 连接
+const ws = new WebSocket('ws://localhost:3007');
+
 onMounted(() => {
   // 创建echart节点
   chartInstance.value = echarts.init(chartContainer.value);
-  // 创建 WebSocket 连接
-  const ws = new WebSocket('ws://localhost:3007');
 
   // 当接收到服务器消息时更新下载速度
   ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    downloadSpeed.value = parseFloat(data.downloadSpeed).toFixed(2); // 更新下载速度
+    console.log(data);
+    
+    downloadSpeed.value = parseFloat(parseFloat(data.downloadSpeed).toFixed(2)); // 更新下载速度
     latency.value = parseInt(data.latency); // 更新延迟
+    oneMinute.value = data.result.oneMinute
+    fiveMinute.value = data.result.fiveMinute
+    oneHour.value = data.result.oneHour
 
     // 添加新的数据点
     const now = new Date().toLocaleTimeString();
@@ -68,5 +85,10 @@ onMounted(() => {
     }
     updateChart();
   };
+});
+
+// 使用生命周期钩子在组件卸载时关闭 WebSocket 连接
+onUnmounted(() => {
+  if (ws) ws.close();
 });
 </script>

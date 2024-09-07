@@ -7,6 +7,7 @@ import router from './router'
 
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import '@/style/style.css'
 import '@/assets/css/main.css'
 
 const app = createApp(App)

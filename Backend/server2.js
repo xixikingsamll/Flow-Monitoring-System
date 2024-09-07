@@ -23,8 +23,7 @@ wss.on('connection', (ws) => {
       let total = sentMB + receivedMB;
       console.log(total);
       
-      ws.send(JSON.stringify(connections));
-      ws.send(total)
+      ws.send(JSON.stringify({connections, total}));
     });
   }, 1000); // 每1秒获取一次数据
 

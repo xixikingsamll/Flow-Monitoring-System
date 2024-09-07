@@ -1,11 +1,31 @@
 <template>
-    <el-steps style="width:auto;" :active="1">
-      <el-step title="Step 1" :icon="Edit" />
-      <el-step title="Step 2" :icon="Upload" />
-      <el-step title="Step 3" :icon="Picture" />
-    </el-steps>
+  <el-steps class="w-full py-16" :active="title.length" align-start>
+    <div class=" w-64"> {{ bigTitle }} </div>
+    <el-step v-for="(item, index) in title" :key="index" :title="item" :description="description[index]" />
+  </el-steps>
 </template>
   
 <script lang="ts" setup>
-import { Edit, Picture, Upload } from '@element-plus/icons-vue'
+defineProps({
+  bigTitle: {
+    type: String,
+    default: 'Title'
+  },
+  title: {
+    type: Array,
+    default: () => [
+      'Step 1',
+      'Step 2',
+      'Step 3'
+    ]
+  },
+  description :  {
+    type: Array,
+    default : () => [
+      'Some description',
+      'Some description',
+      'Some description'
+    ]
+  }
+})
 </script>
