@@ -13,6 +13,8 @@ let ws2; // 用于server
 const counterStore = useCounterFlow();
 
 const flow = ref(0)
+const sentByte = ref(0)
+const receivedByte = ref(0)
 const trafficData = ref('')
 ws = new WebSocket('ws://localhost:8080');
 ws2 = new WebSocket('ws://localhost:3007');
@@ -31,7 +33,10 @@ const connectWebSocket = () => {
   ws.onmessage = (event:any) => {
     const connections = JSON.parse(event.data)
     flow.value = parseFloat(connections.total)
-    counterStore.setFlow(flow.value)
+    sentByte.value = parseFloat(connections.sentMB)
+    receivedByte.value = parseFloat(connections.receivedMB)
+    counterStore.set(flow.value, sentByte.value, receivedByte.value)
+
   };
   ws.onclose = () => {
     console.log('服务器连接已关闭')

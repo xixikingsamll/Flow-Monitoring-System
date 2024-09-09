@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const getPortTraffic = require('./functions/getApp');
 
 // 创建 WebSocket 服务器
-const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocket.Server({ port: 8080 }); 
 
 // 字节 -> MB单位转换
 function bytesToMB(bytes) {
@@ -21,9 +21,9 @@ wss.on('connection', (ws) => {
       let sentMB = parseFloat(bytesToMB(totalTraffic).toFixed(4))
       let receivedMB = parseFloat(bytesToMB(totalReceived).toFixed(4))
       let total = sentMB + receivedMB;
-      console.log(total);
+      console.log(sentMB, receivedMB, total);
       
-      ws.send(JSON.stringify({connections, total}));
+      ws.send(JSON.stringify({connections, sentMB, receivedMB, total}));
     });
   }, 1000); // 每1秒获取一次数据
 

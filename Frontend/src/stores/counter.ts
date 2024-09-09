@@ -14,11 +14,17 @@ export const useCounterStore = defineStore('counter', () => {
 // 记录消耗的流量
 export const useCounterFlow = defineStore('counterFlow', () => {
   const flow = ref(0)
+  const sentByte = ref(0)
+  const receivedByte = ref(0)
 
    // 定义更新 flow 的方法
-  const setFlow = (newFlow: number) => {
-    flow.value = newFlow;
+  const set = (newFlow: number, newsentByte: number, newreceivedByte: number) => {
+    flow.value = newFlow
+    sentByte.value = newsentByte
+    receivedByte.value = newreceivedByte
   };
 
-  return { flow,setFlow }
+
+  return { flow, sentByte, receivedByte, set }
 })
+

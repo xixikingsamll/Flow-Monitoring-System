@@ -1,14 +1,16 @@
 <template>
-  <div>
-    <div class="flex flex-row justify-around items-center w-full pt-10">
-      <DataCard color="blue" title="当前下载速度" unit="Mbps" :data="downloadSpeed"/>
-      <DataCard color="black" title="延迟" unit="ms" :data="latency"/>
-    </div>
-    <div ref="chartContainer" style="width: 100%; height: 400px;"></div>
-    <div class="flex flex-row justify-around items-center w-full pt-10">
-      <DataCard color="blue" title="近一分钟平均网速" unit="Mbps" :data="oneMinute"/>
-      <DataCard color="red" title="近五分钟平均网速" unit="Mbps" :data="fiveMinute"/>
-      <DataCard color="red" title="近一小时平均网速" unit="Mbps" :data="oneHour"/>
+  <div class="flex justify-between item-center flex-row">
+    <div id="main" style="width: 500px; height: 500px; padding-top: 40px;"></div>
+    <div class="flex flex-col justify-around items-center w-[1000px]">
+      <div class="flex flex-row justify-around items-center w-full pt-10">
+        <DataCard color="black" title="当前下载速度" unit="Mbps" :data="downloadSpeed"/>
+        <DataCard color="black" title="延迟" unit="ms" :data="latency"/>
+      </div>
+      <div class="flex flex-row justify-around items-center w-full pt-10 gap-10">
+        <DataCard color="red" title="近一分钟平均网速" unit="Mbps" :data="oneMinute"/>
+        <DataCard color="red" title="近五分钟平均网速" unit="Mbps" :data="fiveMinute"/>
+        <DataCard color="red" title="近一小时平均网速" unit="Mbps" :data="oneHour"/>
+      </div>
     </div>
   </div>
 </template>
@@ -18,50 +20,74 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import * as echarts from 'echarts';
 import DataCard from '@/components/monitor/DataCard.vue';
 
+type EChartsOption = echarts.EChartsOption;
 const downloadSpeed = ref(0); // 保存下载速度的变量
 const latency = ref(0); // 保存网络延迟的变量
 const oneMinute = ref()
 const fiveMinute = ref()
 const oneHour = ref()
-const chartContainer = ref(null);
-const chartInstance = ref();
-const defaultXY = new Array(120).fill(0)
-const xy = ref({
-  timestamps: [...defaultXY],
-  speeds: [...defaultXY]
-});
-
-// 更新数据
-const updateChart = () => {
-  if (chartInstance.value) {
-    chartInstance.value.setOption({
-      xAxis: {
-        type: 'category',
-        data: xy.value.timestamps
-      },
-      yAxis: {
-        type: 'value',
-        name: '下载速度 (Mbps)'
-      },
-      series: [
-        {
-          name: '下载速度',
-          type: 'line',
-          areaStyle: {},
-          data: xy.value.speeds
-        }
-      ]
-    });
-  }
-};
 
 // 创建 WebSocket 连接
 const ws = new WebSocket('ws://localhost:3007');
 
 onMounted(() => {
-  // 创建echart节点
-  chartInstance.value = echarts.init(chartContainer.value);
-
+  let chartDom = document.getElementById('main')!;
+  let option: EChartsOption;
+  let myChart = echarts.init(chartDom);
+  option = {
+    series: [
+      {
+        type: 'gauge',
+        max: 800,
+        axisLine: {
+          lineStyle: {
+            width: 30,
+            color: [
+              [0.3, '#67e0e3'],
+              [0.7, '#37a2da'],
+              [1, '#fd666d']
+            ]
+          }
+        },
+        pointer: {
+          itemStyle: {
+            color: 'auto'
+          }
+        },
+        axisTick: {
+          distance: -30,
+          length: 8,
+          lineStyle: {
+            color: '#fff',
+            width: 2
+          }
+        },
+        splitLine: {
+          distance: -30,
+          length: 30,
+          lineStyle: {
+            color: '#fff',
+            width: 4
+          }
+        },
+        axisLabel: {
+          color: 'inherit',
+          distance: 40,
+          fontSize: 20
+        },
+        detail: {
+          valueAnimation: true,
+          formatter: '{value} mbps',
+          color: 'inherit'
+        },
+        data: [
+          {
+            value: 0
+          }
+        ]
+      }
+    ]
+  };
   // 当接收到服务器消息时更新下载速度
   ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
@@ -72,19 +98,23 @@ onMounted(() => {
     oneMinute.value = data.result.oneMinute
     fiveMinute.value = data.result.fiveMinute
     oneHour.value = data.result.oneHour
-
-    // 添加新的数据点
-    const now = new Date().toLocaleTimeString();
-    xy.value.timestamps.push(now);
-    xy.value.speeds.push(downloadSpeed.value);
-
-    // 限制数据点数量，保留最新的 60 秒的数据
-    if (xy.value.timestamps.length > 120) {
-      xy.value.timestamps.shift();
-      xy.value.speeds.shift();
-    }
-    updateChart();
   };
+
+  setInterval(function () {
+    myChart.setOption<echarts.EChartsOption>({
+      series: [
+        {
+          data: [
+            {
+              value: downloadSpeed.value.toFixed(2)
+            }
+          ]
+        }
+      ]
+    });
+  }, 1000);
+
+  option && myChart.setOption(option);
 });
 
 // 使用生命周期钩子在组件卸载时关闭 WebSocket 连接
