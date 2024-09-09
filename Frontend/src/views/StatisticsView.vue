@@ -3,65 +3,117 @@ import { useCounterFlow } from '@/stores/counter';
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as echarts from 'echarts'
 
-type ArrayElement = [string, number, number, number]
-
 // 消耗的流量
 const flow = ref(0);
 const sentByte = ref(0);
 const receivedByte = ref(0);
 let timer: number | undefined;
-const array: ArrayElement[] = []
+
+const flowArray:number[] = []
+const sentByteArray:number[] = []
+const receivedByteArray:number[] = []
 
 onMounted(() => {
   // 初始化 ECharts 实例
   let chartDom = document.getElementById('main');
+  let chartDom1 = document.getElementById('main1');
+  let chartDom2 = document.getElementById('main2');
   let myChart = echarts.init(chartDom);
+  let myChart1 = echarts.init(chartDom1);
+  let myChart2 = echarts.init(chartDom2);
 
   // 定义 ECharts 配置项
   let option = {
-    legend: {},
-    tooltip: {},
-    dataset: {
-      source: [
-        ['product', '总流量', '接收字节', '发送字节'],
-        ...array
-      ]
+    title: {
+      text: '总流量'
     },
-    xAxis: { type: 'category' },
-    yAxis: { name: '单位：MB' },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+    },
+    yAxis: {
+      type: 'value'
+    },
+    legend: {
+        data: ['总流量']
+    },
+    tooltip: {
+      trigger: 'axis',       // 触发类型，'axis' 表示跟随坐标轴
+      axisPointer: {         // 指示器设置
+        type: 'shadow'       // 指示器类型，'shadow' 表示阴影指示器
+      },
+    },
     series: [
       {
-        type: 'bar',
-        label: {
-          show: true, // 显示标签
-          position: 'top', // 标签显示在条形的顶部
-          formatter: (params: any) => params.value[1], // 显示当前的数值
-          fontSize: 12
-        }
+        data: [...flowArray],
+        type: 'line',
+        areaStyle: {}
+      }
+    ]
+  };
+
+  let option1 = {
+    title: {
+      text: '发送字节'
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+    },
+    tooltip: {
+      trigger: 'axis',       // 触发类型，'axis' 表示跟随坐标轴
+      axisPointer: {         // 指示器设置
+        type: 'shadow'       // 指示器类型，'shadow' 表示阴影指示器
       },
+    },
+    yAxis: {
+      type: 'value'
+    },
+    legend: {
+      data: ['发送字节']
+    },
+    series: [
       {
-        type: 'bar',
-        label: {
-          show: true,
-          position: 'top',
-          formatter: (params: any) => params.value[2],
-          fontSize: 12
-        }
+        data: [...sentByteArray],
+        type: 'line',
+        areaStyle: {}
+      }
+    ]
+  };
+
+  let option2 = {
+    title: {
+      text: '接收字节'
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+    },
+    tooltip: {
+      trigger: 'axis',       // 触发类型，'axis' 表示跟随坐标轴
+      axisPointer: {         // 指示器设置
+        type: 'shadow'       // 指示器类型，'shadow' 表示阴影指示器
       },
+    },
+    yAxis: {
+      type: 'value'
+    },
+    legend: {
+      data: 'faso'
+    },
+    series: [
       {
-        type: 'bar',
-        label: {
-          show: true,
-          position: 'top',
-          formatter: (params: any) => params.value[3],
-          fontSize: 12
-        }
+        data: [sentByteArray],
+        type: 'line',
+        areaStyle: {}
       }
     ]
   };
 
   // 初始化 ECharts 配置
   myChart.setOption(option);
+  myChart1.setOption(option1);
+  myChart2.setOption(option2);
 
   // 每秒更新数据
   timer = setInterval(() => {
@@ -70,21 +122,63 @@ onMounted(() => {
     sentByte.value = parseFloat(counterFlow.sentByte.toFixed(2));
     receivedByte.value = parseFloat(counterFlow.receivedByte.toFixed(2));
 
-    const now = new Date().toLocaleTimeString();
-    array.push([now, flow.value, receivedByte.value, sentByte.value,]);
+    flowArray.push(flow.value);
+    sentByteArray.push(sentByte.value);
+    receivedByteArray.push(receivedByte.value);
 
-    // 保持数组的最大长度为 10
-    if (array.length > 23) {
-      array.shift();
+    const minFlow = Math.min(...flowArray);
+    const minSentByte = Math.min(...sentByteArray);
+    const minReceivedByte = Math.min(...receivedByteArray);
+
+    if (flowArray.length > 23) {
+      flowArray.shift();
+    }
+
+    if (sentByteArray.length > 12) {
+      sentByteArray.shift();
+      receivedByteArray.shift();
     }
 
     // 更新 ECharts 数据集的 `source`
     myChart.setOption({
-      dataset: {
-        source: [
-          ['product', '总流量', '接收字节', '发送字节'],
-          ...array
-        ]
+      series: [
+        {
+          data: [...flowArray],
+          type: 'line',
+          areaStyle: {}
+        }
+      ],
+      yAxis: {
+        min: minFlow,
+        name: '单位：MB'
+      }
+    });
+
+    myChart1.setOption({
+      series: [
+        {
+          data: [...sentByteArray],
+          type: 'line',
+          areaStyle: {}
+        }
+      ],
+      yAxis: {
+        min: minSentByte,
+        name: '单位：MB'
+      }
+    });
+
+    myChart2.setOption({
+      series: [
+        {
+          data: [...receivedByteArray],
+          type: 'line',
+          areaStyle: {}
+        }
+      ],
+      yAxis: {
+        min: minReceivedByte,
+        name: '单位：MB'
       }
     });
   }, 1000);
@@ -99,8 +193,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full flex justify-center items-center h-48 font-bold border-b-2">
+  <div class="w-full flex justify-center items-center h-24 font-bold border-b-2">
     <p class="text-4xl">已消耗流量: {{ flow }} MB</p>
   </div>
   <div id="main" style="width: 100%; height: 500px; padding-top: 40px;"></div>
+  <div class="w-full flex flex-row justify-around items-center">
+    <div id="main1" style="width: 40%; height: 500px; padding-top: 20px;"></div>
+    <div id="main2" style="width: 40%; height: 500px; padding-top: 20px;"></div>
+  </div>
 </template>
