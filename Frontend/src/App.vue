@@ -18,7 +18,9 @@ const receivedByte = ref(0)
 const trafficData = ref('')
 ws = new WebSocket('ws://localhost:8080');
 ws2 = new WebSocket('ws://localhost:3007');
+let time = ref()
 
+time.value = counterStore.getTime(new Date().toLocaleTimeString())
 // 定义一个函数来初始化和重新连接 WebSocket
 const connectWebSocket = () => {
 

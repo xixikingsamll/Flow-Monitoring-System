@@ -16,15 +16,21 @@ export const useCounterFlow = defineStore('counterFlow', () => {
   const flow = ref(0)
   const sentByte = ref(0)
   const receivedByte = ref(0)
+  const time = ref()
 
    // 定义更新 flow 的方法
   const set = (newFlow: number, newsentByte: number, newreceivedByte: number) => {
     flow.value = newFlow
     sentByte.value = newsentByte
     receivedByte.value = newreceivedByte
+    time.value = new Date().toLocaleTimeString()
   };
+  
+  const getTime = (newTime: string) => {
+    time.value = newTime
+  }
 
 
-  return { flow, sentByte, receivedByte, set }
+  return { flow, sentByte, receivedByte, time, getTime, set }
 })
 
